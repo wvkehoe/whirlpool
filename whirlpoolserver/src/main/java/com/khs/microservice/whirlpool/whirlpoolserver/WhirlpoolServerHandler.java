@@ -216,7 +216,7 @@ public class WhirlpoolServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (username != null) {
                         for (Channel channel : channels) {
                             String key = channel.attr(WebSocketHelper.getClientAttr()).get();
-                            if (key.equals(username)) {
+                            if (key != null && key.equals(username)) {
                                 logger.error(String.format("Existing user '%s' found, failing login!", username));
                                 nettyCookie = WebSocketHelper.expireCookie(authCookieName, host);
                                 message = "{\"response\": \"fail\", \"reason\": \"Unauthorized, user '" + username + "' is already logged in\"}\r\n";

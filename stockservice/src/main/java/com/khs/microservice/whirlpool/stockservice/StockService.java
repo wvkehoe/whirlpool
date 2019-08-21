@@ -38,7 +38,7 @@ public class StockService extends BaseService {
 
     public StockService() {
         super();
-        startServer("stock-ticker-cmd", "stock-ticker");
+        startServer("stock-ticker-cmd", "stock-ticker", 10000L);        
     }
 
     @Override

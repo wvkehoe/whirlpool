@@ -43,7 +43,7 @@ public class WeatherService extends BaseService {
 
     public WeatherService() {
         super();
-        startServer("weather-cmd", "weather");
+        startServer("weather-cmd", "weather", 10000L);
     }
 
     @Override

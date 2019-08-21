@@ -121,6 +121,8 @@ function kafka_topics() {
     "${KAFKA_HOME}/bin/kafka-topics.sh" --zookeeper "${ZOOKEEPER}" --create --partitions 16 --replication-factor ${KAFKA_REPLICATION} --topic "updown-cmd" & PID3=$!
     "${KAFKA_HOME}/bin/kafka-topics.sh" --zookeeper "${ZOOKEEPER}" --create --partitions 16 --replication-factor ${KAFKA_REPLICATION} --topic "weather" & PID4=$!
     "${KAFKA_HOME}/bin/kafka-topics.sh" --zookeeper "${ZOOKEEPER}" --create --partitions 16 --replication-factor ${KAFKA_REPLICATION} --topic "weather-cmd" & PID5=$!
+    "${KAFKA_HOME}/bin/kafka-topics.sh" --zookeeper "${ZOOKEEPER}" --create --partitions 16 --replication-factor ${KAFKA_REPLICATION} --topic "topic" & PID6=$!
+    "${KAFKA_HOME}/bin/kafka-topics.sh" --zookeeper "${ZOOKEEPER}" --create --partitions 16 --replication-factor ${KAFKA_REPLICATION} --topic "topic-cmd" & PID7=$!
 
     wait $PID0; RESULT=$(($RESULT | $?))
     wait $PID1; RESULT=$(($RESULT | $?))
@@ -128,6 +130,8 @@ function kafka_topics() {
     wait $PID3; RESULT=$(($RESULT | $?))
     wait $PID4; RESULT=$(($RESULT | $?))
     wait $PID5; RESULT=$(($RESULT | $?))
+    wait $PID6; RESULT=$(($RESULT | $?))
+    wait $PID7; RESULT=$(($RESULT | $?))
 
     echo "DONE!"
     if [ $RESULT == 0 ]; then
@@ -141,9 +145,9 @@ function zk_kafka() {
     export KAFKA_SCALA_VERSION=2.11
     export KAFKA_VERSION=0.9.0.1
 
-    echo "Removing previous installation of Kafka and Zookeeper"
-    rm -rf /Applications/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}
-    rm -rf /Applications/kafka
+    # echo "Removing previous installation of Kafka and Zookeeper"
+    # rm -rf /Applications/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}
+    # rm -rf /Applications/kafka
 
     # axe kafka logs
     echo "Removing Kafka logs"
@@ -153,21 +157,21 @@ function zk_kafka() {
     echo "Removing Zookeeper data"
     rm -rf /tmp/zookeeper
 
-    echo "Installing version ${KAFKA_SCALA_VERSION}-${KAFKA_VERSION} of Kafka and Zookeeper..."
+    # echo "Installing version ${KAFKA_SCALA_VERSION}-${KAFKA_VERSION} of Kafka and Zookeeper..."
 
     # Install Kafka, which also installs Zookeeper
-    if [ ! -f /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz ]; then
-        curl -# -L -o /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz http://mirrors.ibiblio.org/apache/kafka/${KAFKA_VERSION}/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz
-    fi
+    # if [ ! -f /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz ]; then
+    #    curl -# -L -o /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz http://mirrors.ibiblio.org/apache/kafka/${KAFKA_VERSION}/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz
+    # fi
 
-    tar xfz /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz -C /Applications
-    ln -s /Applications/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION} /Applications/kafka
+    # tar xfz /tmp/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz -C /Applications
+    # ln -s /Applications/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION} /Applications/kafka
 
-    export KAFKA_HOME=/Applications/kafka
+    # export KAFKA_HOME=/Applications/kafka
     export KAFKA_REPLICATION=1
     export KAFKA_HSIZE=704
 
-    export ZOOKEEPER_HOME=/Applications/kafka
+    # export ZOOKEEPER_HOME=/Applications/kafka
     export ZOOKEEPER=zookeeper.whirlpool:2181
     export ZOOKEEPEROPS=zookeeper.whirlpool:2181
 
@@ -197,6 +201,8 @@ function start_services {
     $(new_tab "UpDown Service"    "cd ./updownservice/target; ./updownservice;")
     echo "Starting Weather Service"
     $(new_tab "Weather Service"   "cd ./weatherservice/target; ./weatherservice;")
+    echo "Starting Topic Service"
+    $(new_tab "Topic Service"   "cd ./topicservice/target; ./topicservice;")
     echo "Starting Whirlpool Server"
     $(new_tab "Whirlpool Server"  "cd ./whirlpoolserver; ./target/whirlpoolserver;")
 }

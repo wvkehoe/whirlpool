@@ -33,7 +33,7 @@ public class UpDownService extends BaseService {
 
     public UpDownService() {
         super();
-        startServer("updown-cmd", "updown");
+        startServer("updown-cmd", "updown", 10000L);
     }
 
     @Override

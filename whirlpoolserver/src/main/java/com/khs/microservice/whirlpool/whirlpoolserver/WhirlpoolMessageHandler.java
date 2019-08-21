@@ -65,9 +65,14 @@ public class WhirlpoolMessageHandler implements WebSocketMessageHandler {
     public String handleMessage(ChannelHandlerContext ctx, String frameText) {
         Message message = gson.fromJson(frameText, Message.class);
 
+        if (message.getType() == null) {
+            return null;    // TODO: for some reason we are getting TextWebSocketFrames containin the following in their framebuffers
+            // "op":"PING","principal":"anonymous","ticket":"anonymous","roles":"[]"}
+        }
         if (message.getType().equals("TickerCommand") ||
             message.getType().equals("UpDownCommand") ||
-            message.getType().equals("WeatherCommand")) {
+            message.getType().equals("WeatherCommand") ||
+            message.getType().equals("TopicCommand")) {
             requestQueue.add(frameText);
         } else {
             CommandResponse commandResponse = new CommandResponse();
@@ -119,6 +124,8 @@ public class WhirlpoolMessageHandler implements WebSocketMessageHandler {
                             case "WeatherCommand":
                                 topic = "weather-cmd";
                                 break;
+                            case "TopicCommand":
+                                topic = "topic-cmd";
                         }
 
                         if (topic != null) {
@@ -162,7 +169,7 @@ public class WhirlpoolMessageHandler implements WebSocketMessageHandler {
                 consumer = new KafkaConsumer<>(properties);
             }
 
-            consumer.subscribe(Arrays.asList("stock-ticker", "weather", "updown"));
+            consumer.subscribe(Arrays.asList("stock-ticker", "weather", "updown", "topic"));
             int timeouts = 0;
 
             try {
@@ -182,6 +189,7 @@ public class WhirlpoolMessageHandler implements WebSocketMessageHandler {
                             case "stock-ticker":
                             case "weather":
                             case "updown":
+                            case "topic":
                                 try {
                                     consumer.commitSync();
                                 } catch (CommitFailedException e) {
@@ -192,7 +200,8 @@ public class WhirlpoolMessageHandler implements WebSocketMessageHandler {
                                 Message message = gson.fromJson(record.value(), Message.class);
                                 for (Channel channel : channels) {
                                     String key = channel.attr(WebSocketHelper.getClientAttr()).get();
-                                    if (key.equals(message.getId())) {
+                                    // TODO: for some reason clientAttr is missing in some responses
+                                    if (key != null && key.equals(message.getId())) {
                                         channelFound = true;
                                         channel.writeAndFlush(new TextWebSocketFrame(record.value()));
                                         break;

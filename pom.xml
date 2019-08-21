@@ -16,6 +16,7 @@
         <module>stockservice</module>
         <module>updownservice</module>
         <module>weatherservice</module>
+        <module>topicservice</module>
         <module>whirlpoolserver</module>
         <module>common</module>
     </modules>

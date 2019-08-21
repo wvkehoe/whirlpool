@@ -42,7 +42,20 @@ public abstract class BaseService {
 
     protected abstract void collectData(Gson gson, String user, List<String> subscriptions);
 
-    public void startServer(String commandTopic, String producerTopic) {
+    protected void addSubscription(String user, String subbscription) {
+        return;
+    }
+
+    protected void removeSubscription(String user, String subbscription) {
+        return;
+    }
+
+    // clean-up any resources
+    protected void cleanup() {
+        return;
+    }
+
+    public void startServer(String commandTopic, String producerTopic, long collectIntervalMs) {
         consumerExecutor = Executors.newSingleThreadExecutor(
                 new ThreadFactoryBuilder()
                         .setDaemon(true)
@@ -70,7 +83,7 @@ public abstract class BaseService {
         FutureTask<String> readTickers = new FutureTask<>(new ReaderCallable(commandTopic));
         consumerExecutor.execute(readTickers);
 
-        FutureTask<String> dataTickers = new FutureTask<>(new DataCollectorCallable());
+        FutureTask<String> dataTickers = new FutureTask<>(new DataCollectorCallable(collectIntervalMs));
         dataExecutor.execute(dataTickers);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -135,9 +148,9 @@ public abstract class BaseService {
                                     if (items == null) {
                                         items = new CopyOnWriteArrayList<>();
                                     }
-
                                     items.add(command.getSubscription());
                                     allSubscriptions.put(command.getId(), items);
+                                    addSubscription(command.getId(), command.getSubscription());
                                     response.setResult(MessageConstants.SUCCESS);
                                 } else if ("remove".equals(command.getCommand())) {
                                     items = allSubscriptions.get(command.getId());
@@ -145,6 +158,7 @@ public abstract class BaseService {
                                     if (items.contains(command.getSubscription())) {
                                         items.remove(command.getSubscription());
                                         allSubscriptions.put(command.getId(), items);
+                                        removeSubscription(command.getId(), command.getSubscription());
                                         response.setResult(MessageConstants.SUCCESS);
                                     } else {
                                         response.setResult(MessageConstants.FAILURE);
@@ -194,8 +208,11 @@ public abstract class BaseService {
     public class DataCollectorCallable implements Callable<String> {
         // one per callable as it is stateless, but not thread safe
         private Gson gson = new Gson();
+        private long mCollectIntervalMs;
 
-        public DataCollectorCallable() {
+
+        public DataCollectorCallable(long collectIntervalMs) {
+            mCollectIntervalMs = collectIntervalMs;
         }
 
         @Override
@@ -212,8 +229,9 @@ public abstract class BaseService {
                     }
 
                     // only collect data every 10 seconds so remote services aren't overwhelmed with messages
-                    Thread.sleep(10000L);
+                    Thread.sleep(mCollectIntervalMs);
                 }
+                cleanup();
             } catch (Throwable throwable) {
                 logger.error(throwable.getMessage(), throwable);
             }

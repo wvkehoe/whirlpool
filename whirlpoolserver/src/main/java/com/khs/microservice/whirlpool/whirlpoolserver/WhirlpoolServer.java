@@ -32,6 +32,9 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
@@ -57,12 +60,15 @@ public final class WhirlpoolServer {
           .childHandler(new ChannelInitializer<SocketChannel>() {
              @Override
              public void initChannel(SocketChannel ch) throws Exception {
+                CorsConfigBuilder corsCfgBuilder = CorsConfigBuilder.forAnyOrigin();
+                CorsConfig corsConfig = corsCfgBuilder.allowCredentials().allowedRequestHeaders("Content-Type","Cookie").build();
                 ChannelPipeline p = ch.pipeline();
                 p.addLast("encoder", new HttpResponseEncoder());
                 p.addLast("decoder", new HttpRequestDecoder());
                 p.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8));
                 p.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8));
                 p.addLast("aggregator", new HttpObjectAggregator(65536));
+                p.addLast("cors", new CorsHandler(corsConfig));
                 p.addLast("handler", new WhirlpoolServerHandler());
              }
           });

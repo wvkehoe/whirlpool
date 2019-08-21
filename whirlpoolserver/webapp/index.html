@@ -45,6 +45,7 @@
                     <th style="text-align: left;">Stock</th>
                     <th style="text-align: left;">UpDown</th>
                     <th style="text-align: left;">City,State</th>
+                    <th style="text-align: left;">Topic</th>
                     <th></th>
                 </tr>
                 <tr>
@@ -69,6 +70,12 @@
                         <input id="remove_weather" class="red" type="button" value="X"
                                onclick="sendWeatherRemove(document.getElementById('data').value); return false;">
                     </td>
+                    <td width="100px">
+                        <input id="add_topic" type="button" value="A"
+                               onclick="sendTopicAdd(document.getElementById('data').value); return false;">
+                        <input id="remove_topic" class="red" type="button" value="X"
+                               onclick="sendTopicRemove(document.getElementById('data').value); return false;">
+                    </td>
                     <td>
                         <button onclick="logout(); return false;">Logout</button>
                     </td>
@@ -79,14 +86,16 @@
 
             <table style="width: 100%">
                 <tr>
-                    <th style="text-align: left; width: 20%;">Stocks</th>
-                    <th style="text-align: left; width: 40%;">UpDown</th>
-                    <th style="text-align: left; width: 40%;">Weather</th>
+                    <th style="text-align: left; width: 10%;">Stocks</th>
+                    <th style="text-align: left; width: 30%;">UpDown</th>
+                    <th style="text-align: left; width: 30%;">Weather</th>
+                    <th style="text-align: left; width: 30%;">Topics</th>
                 </tr>
                 <tr>
                     <td><select id="stocklist" size="20" style="width: 90%"></select></td>
                     <td><select id="updownlist" size="20" style="width: 90%"></select></td>
                     <td><select id="weatherlist" size="20" style="width: 90%"></select></td>
+                    <td><select id="topiclist" size="20" style="width: 90%"></select></td>
                 </tr>
             </table>
 

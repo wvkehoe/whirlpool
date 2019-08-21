@@ -91,6 +91,7 @@ function startWebSocket(wsUrl) {
         removeSelectOptions(document.getElementById("stocklist"));
         removeSelectOptions(document.getElementById("updownlist"));
         removeSelectOptions(document.getElementById("weatherlist"));
+        removeSelectOptions(document.getElementById("topiclist"));
         var p = document.getElementById("current_user");
         p.innerHTML = "";
     };
@@ -162,13 +163,31 @@ function startWebSocket(wsUrl) {
                     }
                 }
             }
-        } else if (dataResponse.type === 'TickerCommand' || dataResponse.type === 'UpDownCommand' || dataResponse.type === 'WeatherCommand') {
+        } else if (dataResponse.type === 'TopicResponse') {
+            selectBox = document.getElementById("topiclist");
+
+            for (propertyName in dataResponse['subscriptionData']) {
+                if (dataResponse['subscriptionData'].hasOwnProperty(propertyName)) {
+                    option = findSelectOption(selectBox, propertyName + ":");
+                    if (option) {
+                        option.text = propertyName + ': $' + dataResponse['subscriptionData'][propertyName];
+                    } else {
+                        option = document.createElement("option");
+                        option.text = propertyName + ': $' + dataResponse['subscriptionData'][propertyName];
+                        selectBox.add(option);
+                    }
+                }
+            }
+        } else if (dataResponse.type === 'TickerCommand' || dataResponse.type === 'UpDownCommand' ||
+                   dataResponse.type === 'WeatherCommand'|| dataResponse.type === 'TopicCommand') {
             if (dataResponse.type === 'TickerCommand') {
                 selectBox = document.getElementById("stocklist");
             } else if (dataResponse.type === 'UpDownCommand') {
                 selectBox = document.getElementById("updownlist");
             } else if (dataResponse.type === 'WeatherCommand') {
                 selectBox = document.getElementById("weatherlist");
+            } else if (dataResponse.type === 'TopicCommand') {
+                selectBox = document.getElementById("topiclist");
             }
 
             if (dataResponse["command"] === 'remove') {
@@ -225,6 +244,17 @@ function writeToScreen(message) {
     option.text = message;
     document.getElementById("output").add(option);
 }
+
+function sendTopicAdd(topic) {
+    var message = '{"type":"TopicCommand", "id":"' + clientName + '", "command":"add", "subscription":"' + topic + '"}';
+    doSend(message);
+}
+
+function sendTopicRemove(topic) {
+    var message = '{"type":"TopicCommand", "id":"' + clientName + '", "command":"remove", "subscription":"' + topic + '"}';
+    doSend(message);
+}
+
 
 window.addEventListener("load", init, false);
 
